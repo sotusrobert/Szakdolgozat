@@ -1,5 +1,8 @@
 package InvoiceProgram.Controller;
 
+import InvoiceProgram.Controller.ControllerUser.UserListeners;
+import InvoiceProgram.Model.User;
+import InvoiceProgram.Service.ServiceUser;
 import InvoiceProgram.View.MainMenu2;
 import InvoiceProgram.View.PanelMain;
 import InvoiceProgram.View.PanelMasterData;
@@ -11,20 +14,26 @@ import java.awt.event.ActionListener;
 import javax.swing.JOptionPane;
 import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
 
-public class ControllerMainMenu {
+public class ControllerMainMenu implements UserListeners {
 
     private final MainMenu2 view;
     private PanelMain panelMain;
     private PanelMasterData panelMasterData;
     private PanelSettings panelSettings;
+    private String username;
+    private int id;
+    private String firm;
 
-    public ControllerMainMenu() {
+    public ControllerMainMenu(String firm) {
         view = new MainMenu2();
+        this.firm=firm;
         initView();
         initControll();
     }
 
     public final void initView() {
+        view.getjTF_user().setText(username);
+        view.getjLab_Firm().setText(firm);
         view.setVisible(true);
         view.setLocationRelativeTo(null);
         view.getjPan_Main().setLayout(new GridBagLayout());
@@ -44,6 +53,19 @@ public class ControllerMainMenu {
     }
 
     public final void initControll() {
+        panelMain.getjBut_Partner().addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ControllerPartner controller=new ControllerPartner(firm);
+            }
+        });
+        
+        panelMain.getjBut_Invoice().addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ControllerInvoiceMenu controller=new ControllerInvoiceMenu(firm);
+            }
+        });
 
         view.getjBt_MainMenu().addActionListener(new ActionListener() {
             @Override
@@ -74,6 +96,7 @@ public class ControllerMainMenu {
                 panelMain.setVisible(false);
                 panelMasterData.setVisible(false);
                 panelSettings.setVisible(true);
+                initControllMasterSettings();
             }
         });
         view.getjBt_Exit().addActionListener(new ActionListener() {
@@ -101,65 +124,129 @@ public class ControllerMainMenu {
         panelMasterData.getjBt_Firm().addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-                
+                ControllerFirm controller= new ControllerFirm(firm);
             }
         });
         panelMasterData.getjBt_TaxYears().addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-                ControllerTaxYear controller= new ControllerTaxYear();
+                ControllerTaxYear controller= new ControllerTaxYear(firm);
             }
         });
         panelMasterData.getjBt_TaxCodes().addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-                ControllerTaxCode controller= new ControllerTaxCode();
+                ControllerTaxCode controller= new ControllerTaxCode(firm);
             }
         });
         panelMasterData.getjB_Banks().addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-                ControllerBank controller= new ControllerBank();
+                ControllerBank controller= new ControllerBank(firm);
             }
         });
         panelMasterData.getjB_BankAccount().addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-                
+                ControllerBankAccount controller= new ControllerBankAccount(firm);
             }
         });
         panelMasterData.getjB_Countires().addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-                ControllerCountry controller= new ControllerCountry();
+                ControllerCountry controller= new ControllerCountry(firm);
             }
         });
         panelMasterData.getjB_Currencies().addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-                ControllerCurrency controller= new ControllerCurrency();
+                ControllerCurrency controller= new ControllerCurrency(firm);
             }
         });
         panelMasterData.getjB_Languages().addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-                ControllerLanguage controller= new ControllerLanguage();
+                ControllerLanguage controller= new ControllerLanguage(firm);
                 
             }
         });
         panelMasterData.getjB_PublicPlaces().addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-                ControllerPublicPlace controller= new ControllerPublicPlace();
+                ControllerPublicPlace controller= new ControllerPublicPlace(firm);
             }
         });
         panelMasterData.getjB_Zips().addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-                ControllerZips controller= new ControllerZips();
+                ControllerZips controller= new ControllerZips(firm);
             }
         });
+        panelMasterData.getjB_Payment().addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ControllerPayment controller= new ControllerPayment(firm);
+            }
+        });
+        panelMasterData.getjB_TransactionType().addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ControllerTransactionType controller= new ControllerTransactionType(firm);
+            }
+        });
+        
+        panelMain.getjBut_Invoice().addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                
+            }
+        });
+        
+        panelMain.getjBut_Query().addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                
+            }
+        });
+    }
+    
+    public void initControllMasterSettings(){
+        ServiceUser su = new ServiceUser();
+        
+        User user= su.getOneUser(id);
+        if (!user.getPermission().equals("Admin")) {
+            panelSettings.getjBt_User().setEnabled(false);
+            panelSettings.getjBt_User().setToolTipText("Csak rendszergazdai jogosultásggal tekinthető meg a menüpont!");
+        }
+        panelSettings.getjBt_User().addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ControllerUsers controller= new ControllerUsers(firm);
+            }
+        });
+        
+        panelSettings.getjBt_OwnData().addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ControllerOwnUser controller= new ControllerOwnUser(firm, id);
+                
+                
+            }
+        });
+    }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    @Override
+    public void updateData(int id, String user) {
+        view.getjTF_user().setText(user);
+        this.id=id;
     }
 
 }

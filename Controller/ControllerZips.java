@@ -15,10 +15,12 @@ public class ControllerZips {
     private final Zipcode_GUI view;
     private final ServiceZips service;
     private ArrayList<ZipsListeners> listeners = new ArrayList<>();
+    private final String firm;
 
-    public ControllerZips() {
+    public ControllerZips(String firm) {
         view = new Zipcode_GUI();
         service = new ServiceZips();
+        this.firm=firm;
         initView();
         initControll();
     }
@@ -29,6 +31,7 @@ public class ControllerZips {
     }
 
     public void initView() {
+        view.getjLab_Firm().setText(firm+" - Irányítószámok");
         service.getAllZip(view.getjTab_Zip());
         view.setLocationRelativeTo(null);
         view.getRootPane().setBorder(BorderFactory.createMatteBorder(4, 4, 4, 4, Color.GRAY));
@@ -39,7 +42,7 @@ public class ControllerZips {
         view.getjB_New().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ControllerZipNew controller = new ControllerZipNew();
+                ControllerZipNew controller = new ControllerZipNew(firm);
             }
         });
         view.getjB_Edit().addActionListener(new ActionListener() {
@@ -51,7 +54,7 @@ public class ControllerZips {
 
                     int row = view.getjTab_Zip().getSelectedRow();
                     String value = view.getjTab_Zip().getValueAt(row, 0).toString();
-                    ControllerZipEdit controll = new ControllerZipEdit();
+                    ControllerZipEdit controll = new ControllerZipEdit(firm);
                     listeners.removeAll(listeners);
                     listeners.add((ZipsListeners) controll);
                     listeners.get(0).updateData(service.getOneZipcode(value));

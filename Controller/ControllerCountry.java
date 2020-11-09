@@ -15,10 +15,12 @@ public class ControllerCountry {
     private final Country_GUI view;
     private final ServiceCountry service;
     private ArrayList<CountryListeners> listeners = new ArrayList<>();
-
-    public ControllerCountry() {
+    private final String firm;
+    
+    public ControllerCountry(String firm) {
         view = new Country_GUI();
         service = new ServiceCountry();
+        this.firm=firm;
         initView();
         initControll();
         refreshData();
@@ -26,6 +28,7 @@ public class ControllerCountry {
     }
 
     public final void initView() {
+        view.getjLab_Firm().setText(firm+" - Országok");
         service.getAllCountry(view.getjTabl_Country());
         view.setLocationRelativeTo(null);
         view.getRootPane().setBorder(BorderFactory.createMatteBorder(4, 4, 4, 4, Color.GRAY));
@@ -42,7 +45,7 @@ public class ControllerCountry {
         view.getjB_New().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ControllerCountryNew controller = new ControllerCountryNew();
+                ControllerCountryNew controller = new ControllerCountryNew(firm);
                 service.getAllCountry(view.getjTabl_Country());
             }
         });
@@ -55,7 +58,7 @@ public class ControllerCountry {
                     int row = view.getjTabl_Country().getSelectedRow();
                     String value = view.getjTabl_Country().getValueAt(row, 0).toString();
 
-                    ControllerCountryEdit controll = new ControllerCountryEdit();
+                    ControllerCountryEdit controll = new ControllerCountryEdit(firm);
                     listeners.removeAll(listeners);
                     listeners.add((CountryListeners) controll);
                     listeners.get(0).updateData(service.getOneCountry(value));

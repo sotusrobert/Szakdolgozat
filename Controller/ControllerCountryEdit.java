@@ -14,6 +14,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import javax.swing.BorderFactory;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -23,18 +24,20 @@ public class ControllerCountryEdit implements CountryListeners {
 
     private final CountryEdit view;
     private final ServiceCountry service;
+    private final String firm;
 
-    public ControllerCountryEdit() {
+    public ControllerCountryEdit(String firm) {
         view = new CountryEdit();
         service = new ServiceCountry();
+        this.firm = firm;
         initView();
         initControll();
     }
-    
 
     public final void initView() {
-
+        view.getjLab_Firm().setText(firm + " - Ország módosítás");
         view.setLocationRelativeTo(null);
+        view.getjTF_ID().setEnabled(false);
         view.getRootPane().setBorder(BorderFactory.createMatteBorder(4, 4, 4, 4, Color.GRAY));
         view.setVisible(true);
     }
@@ -48,9 +51,20 @@ public class ControllerCountryEdit implements CountryListeners {
                 String language = view.getjTF_language().getText();
                 boolean isactive = view.getjCB_active().isSelected();
                 boolean isEU = view.getjCB_EUmember().isSelected();
-                service.updateCountry(view, id, name, language, isactive, isEU);
-                view.dispose();
-                service.setRefreshData(true);
+                if (name.isEmpty() && language.isEmpty()) {
+                    JOptionPane.showMessageDialog(view, "Minden aktív mező kitöltése kötelező!", "Figyelem", JOptionPane.ERROR_MESSAGE);
+                } else if (name.isEmpty()) {
+                    JOptionPane.showMessageDialog(view, "A megnevezés kitöltése kötelező!", "Figyelem", JOptionPane.ERROR_MESSAGE);
+                } else if (language.isEmpty()) {
+                    JOptionPane.showMessageDialog(view, "A nyelv kitöltése kötelező!", "Figyelem", JOptionPane.ERROR_MESSAGE);
+                } else {
+
+                    service.updateCountry(view, id, name, language, isactive, isEU);
+                    view.dispose();
+                    service.setRefreshData(true);
+
+                }
+
             }
         });
         view.getjB_Exit().addActionListener(new ActionListener() {

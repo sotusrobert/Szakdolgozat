@@ -17,10 +17,12 @@ public class ControllerPublicPlace {
     private final PublicPlace_GUI view;
     private final ServicePublicPlace service;
     private ArrayList<PublicPlaceListeners> listeners = new ArrayList<>();
-
-    public ControllerPublicPlace() {
+    private final String firm;
+    
+    public ControllerPublicPlace(String firm) {
         view = new PublicPlace_GUI();
         service = new ServicePublicPlace();
+        this.firm=firm;
         initView();
         initControll();
     }
@@ -34,6 +36,7 @@ public class ControllerPublicPlace {
     }
 
     private void initView() {
+        view.getjLab_Firm().setText(firm+" - Közterület jellegek");
         service.getAllPublicPlace(view.getjT_PublicPlace());
         view.setLocationRelativeTo(null);
         view.getRootPane().setBorder(BorderFactory.createMatteBorder(4, 4, 4, 4, Color.GRAY));
@@ -44,7 +47,7 @@ public class ControllerPublicPlace {
         view.getjB_New().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ControllerPublicPlaceNew controller = new ControllerPublicPlaceNew();
+                ControllerPublicPlaceNew controller = new ControllerPublicPlaceNew(firm);
                 ServiceCountry serviceCountry = new ServiceCountry();
                 listeners.removeAll(listeners);
 
@@ -59,7 +62,7 @@ public class ControllerPublicPlace {
                     int row = view.getjT_PublicPlace().getSelectedRow();
                     String value = view.getjT_PublicPlace().getValueAt(row, 0).toString();
 
-                    ControllerPublicPlaceEdit controll = new ControllerPublicPlaceEdit();
+                    ControllerPublicPlaceEdit controll = new ControllerPublicPlaceEdit(firm);
                     listeners.removeAll(listeners);
                     listeners.add(controll);
                     listeners.get(0).updateData(service.getOnePublicPlace(value));

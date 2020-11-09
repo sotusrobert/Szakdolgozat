@@ -1,8 +1,8 @@
 package InvoiceProgram.Controller;
 
-import InvoiceProgram.Model.TaxYear;
-import InvoiceProgram.Service.ServiceTaxYear;
-import InvoiceProgram.View.TaxYear_GUI;
+import InvoiceProgram.Model.Partner;
+import InvoiceProgram.Service.ServicePartner;
+import InvoiceProgram.View.Partner_GUI;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,54 +10,57 @@ import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.JOptionPane;
 
-public class ControllerTaxYear {
+public class ControllerPartner {
 
-    private final TaxYear_GUI view;
-    private final ServiceTaxYear service;
-    private ArrayList<TaxYearListeners> listeners = new ArrayList<>();
-    private String firm;
-
-    public ControllerTaxYear(String firm) {
-        view = new TaxYear_GUI();
-        service = new ServiceTaxYear();
+    private final Partner_GUI view;
+    private final ServicePartner service;
+    private ArrayList<PartnerListeners> listeners = new ArrayList<>();
+    private final String firm;
+    
+    public ControllerPartner(String firm) {
+        view = new Partner_GUI();
+        service = new ServicePartner();
         this.firm=firm;
         initView();
         initControll();
     }
 
+    public interface PartnerListeners {
+
+        public void updateData(ArrayList<Partner> list);
+    }
+
     public void initView() {
-        view.getjLab_Firm().setText(firm+" - Adóévek");
-        service.getAllTaxYear(view.getjTab_TaxYear());
+        view.getjLab_Firm().setText(firm+" - Partnerek");
+        service.getAllPartner(view.getjTab_Partner());
         view.setLocationRelativeTo(null);
         view.getRootPane().setBorder(BorderFactory.createMatteBorder(4, 4, 4, 4, Color.GRAY));
         view.setVisible(true);
-    }
-
-    public interface TaxYearListeners {
-
-        public void updateData(ArrayList<TaxYear> list);
     }
 
     public void initControll() {
         view.getjBut_New().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ControllerTaxYearNew controller = new ControllerTaxYearNew(firm);
+                ControllerPartnerNew controll = new ControllerPartnerNew(firm);
+
             }
         });
         view.getjBut_Edit().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
-                if (view.getjTab_TaxYear().getSelectionModel().isSelectionEmpty()) {
+                if (view.getjTab_Partner().getSelectionModel().isSelectionEmpty()) {
                     JOptionPane.showMessageDialog(view, "Válasszon ki egy elemet a listából!", "Figyelem", JOptionPane.ERROR_MESSAGE);
                 } else {
-                    int row = view.getjTab_TaxYear().getSelectedRow();
-                    int value = Integer.parseInt(view.getjTab_TaxYear().getValueAt(row, 0).toString());
-                    ControllerTaxYearEdit controll = new ControllerTaxYearEdit(firm);
+                    int row = view.getjTab_Partner().getSelectedRow();
+                    String value = view.getjTab_Partner().getValueAt(row, 0).toString();
+                    int id = Integer.parseInt(value);
+
+                    ControllerPartnerEdit controll = new ControllerPartnerEdit(firm);
                     listeners.removeAll(listeners);
-                    listeners.add((TaxYearListeners) controll);
-                    listeners.get(0).updateData(service.getOneTaxYear(view, value));
+                    listeners.add((PartnerListeners) controll);
+                    listeners.get(0).updateData(service.getOnePartner(id));
+
                 }
 
             }
@@ -65,7 +68,7 @@ public class ControllerTaxYear {
         view.getjBut_Delete().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (view.getjTab_TaxYear().getSelectionModel().isSelectionEmpty()) {
+                if (view.getjTab_Partner().getSelectionModel().isSelectionEmpty()) {
                     JOptionPane.showMessageDialog(view, "Válasszon ki egy elemet a listából!", "Figyelem", JOptionPane.ERROR_MESSAGE);
                 } else {
                     Object[] options = {"Igen",
@@ -79,16 +82,13 @@ public class ControllerTaxYear {
                             options,
                             options[0]);
                     if (n == 0) {
-                        int row = view.getjTab_TaxYear().getSelectedRow();
-                        int value = Integer.parseInt(view.getjTab_TaxYear().getValueAt(row, 0).toString());
-                        if (service.isTaxYearInUse(value)) {
-                            JOptionPane.showMessageDialog(view, "Az adóév nem törölhető, mert már állítottak ki számlát ezen időszakra!", "Figyelem", JOptionPane.ERROR_MESSAGE);
-                        }else{
-                        service.deleteTaxYear(view, value);
-                        }
+                        int row = view.getjTab_Partner().getSelectedRow();
+                        int value = Integer.parseInt(view.getjTab_Partner().getValueAt(row, 0).toString());
+
+                        service.deletePartner(view, value);
                     }
 
-                    service.getAllTaxYear(view.getjTab_TaxYear());
+                    service.getAllPartner(view.getjTab_Partner());
                 }
             }
         });
@@ -99,4 +99,5 @@ public class ControllerTaxYear {
             }
         });
     }
+
 }

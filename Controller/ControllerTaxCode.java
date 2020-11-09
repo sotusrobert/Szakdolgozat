@@ -15,10 +15,12 @@ public class ControllerTaxCode {
     private final Tax_GUI view;
     private final ServiceTax service;
     private ArrayList<TaxListeners> listeners = new ArrayList<>();
+    private String firm;
 
-    public ControllerTaxCode() {
+    public ControllerTaxCode(String firm) {
         view = new Tax_GUI();
         service = new ServiceTax();
+        this.firm=firm;
         initView();
         initControll();
     }
@@ -29,6 +31,7 @@ public class ControllerTaxCode {
     }
 
     public final void initView() {
+        view.getjLab_Firm().setText(firm+" - ÁFA kulcsok");
         service.getAllTaxCode(view.getjTabl_TaxCodes());
         view.setLocationRelativeTo(null);
         view.getRootPane().setBorder(BorderFactory.createMatteBorder(4, 4, 4, 4, Color.GRAY));
@@ -39,7 +42,7 @@ public class ControllerTaxCode {
         view.getjBut_New().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ControllerTaxCodeNew controller = new ControllerTaxCodeNew();
+                ControllerTaxCodeNew controller = new ControllerTaxCodeNew(firm);
 
             }
         });
@@ -51,7 +54,7 @@ public class ControllerTaxCode {
                 } else {
                     int row = view.getjTabl_TaxCodes().getSelectedRow();
                     String value = view.getjTabl_TaxCodes().getValueAt(row, 0).toString();
-                    ControllerTaxEdit controll = new ControllerTaxEdit();
+                    ControllerTaxEdit controll = new ControllerTaxEdit(firm);
                     listeners.removeAll(listeners);
                     listeners.add((TaxListeners) controll);
                     listeners.get(0).updateData(service.getOneTax(value));

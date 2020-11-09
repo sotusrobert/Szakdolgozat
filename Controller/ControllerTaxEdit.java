@@ -11,21 +11,24 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import javax.swing.BorderFactory;
+import javax.swing.JOptionPane;
 
 public class ControllerTaxEdit implements TaxListeners {
 
     private final TaxEdit view;
     private final ServiceTax service;
+    private String firm;
 
-    public ControllerTaxEdit() {
+    public ControllerTaxEdit(String firm) {
         view = new TaxEdit();
         service = new ServiceTax();
+        this.firm = firm;
         initView();
         initControll();
     }
 
     public final void initView() {
-
+        view.getjLab_Firm().setText(firm + " - ÁFA kulcs módosítás");
         view.setLocationRelativeTo(null);
         view.getRootPane().setBorder(BorderFactory.createMatteBorder(4, 4, 4, 4, Color.GRAY));
         view.setVisible(true);
@@ -38,15 +41,23 @@ public class ControllerTaxEdit implements TaxListeners {
                 int Id = Integer.parseInt(view.getjLab_Id().getText());
                 String name = view.getjTF_name().getText();
                 String shortName = view.getjTF_shortName().getText();
-                int rate = Integer.parseInt(view.getjTF_rate().getText());
-                Date dvf = new Date(view.getjDC_validFrom().getDate().getTime());
-                LocalDate vF = dvf.toLocalDate();
-                java.sql.Date validFrom = (java.sql.Date.valueOf(vF));
-                Date dvu = new Date(view.getjDC_validUntil().getDate().getTime());
-                LocalDate vU = dvu.toLocalDate();
-                java.sql.Date validUntil = (java.sql.Date.valueOf(vU));
-                service.updateLanguage(view, Id, name, shortName, rate, validFrom, validUntil);
-                view.dispose();
+                String rate = view.getjTF_rate().getText();
+
+                if (name.isEmpty() && shortName.isEmpty() && rate.isEmpty() && view.getjDC_validFrom().getDate() == null && view.getjDC_validUntil().getDate() == null) {
+                    JOptionPane.showMessageDialog(view, "Minden mező kitöltése kötelező!", "Figyelem", JOptionPane.ERROR_MESSAGE);
+                } else if (!service.isValidRate(rate)) {
+                    JOptionPane.showMessageDialog(view, "A megadott áfakulcs érvénytelen!", "Figyelem", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    Date dvf = new Date(view.getjDC_validFrom().getDate().getTime());
+                    LocalDate vF = dvf.toLocalDate();
+                    java.sql.Date validFrom = (java.sql.Date.valueOf(vF));
+                    Date dvu = new Date(view.getjDC_validUntil().getDate().getTime());
+                    LocalDate vU = dvu.toLocalDate();
+                    java.sql.Date validUntil = (java.sql.Date.valueOf(vU));
+                    service.updateLanguage(view, Id, name, shortName, Integer.parseInt(rate), validFrom, validUntil);
+                    view.dispose();
+                }
+
             }
         });
         view.getjBut_Exit().addActionListener(new ActionListener() {

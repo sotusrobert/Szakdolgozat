@@ -12,21 +12,24 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JOptionPane;
 
 public class ControllerPublicPlaceEdit implements PublicPlaceListeners {
 
     private final PublicPlaceEdit view;
     private final ServicePublicPlace service;
+    private final String firm;
 
-    public ControllerPublicPlaceEdit() {
+    public ControllerPublicPlaceEdit(String firm) {
         view = new PublicPlaceEdit();
         service = new ServicePublicPlace();
+        this.firm = firm;
         initView();
         initControll();
     }
 
     public final void initView() {
-
+        view.getjLab_Firm().setText(firm + " - Közterület jelleg módosítás");
         view.setLocationRelativeTo(null);
         view.getRootPane().setBorder(BorderFactory.createMatteBorder(4, 4, 4, 4, Color.GRAY));
         view.setVisible(true);
@@ -34,15 +37,20 @@ public class ControllerPublicPlaceEdit implements PublicPlaceListeners {
 
     public final void initControll() {
         ServiceCountry serviceCountry = new ServiceCountry();
-        loadCountriesToJComboBox(serviceCountry.getAllCountry());
+        loadCountriesToJComboBox(serviceCountry.getAllActiveCountry());
         view.getjBut_Save().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String id = view.getjLab_Id().getText();
                 String name = view.getjTF_name().getText();
                 String languageId = view.getjCB_Countries().getSelectedItem() + "";
-                service.updatePublicPlace(view, id, name, languageId);
-                view.dispose();
+                if (name.isEmpty()) {
+                    JOptionPane.showMessageDialog(view, "A megnevezés megadása kötelező!", "Figyelem", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    service.updatePublicPlace(view, id, name, languageId);
+                    view.dispose();
+                }
+
             }
         });
         view.getjBut_Exit().addActionListener(new ActionListener() {

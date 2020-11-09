@@ -15,10 +15,12 @@ public final class ControllerCurrency {
     private final Currency_GUI view;
     private final ServiceCurrency service;
     private ArrayList<CurrencyListeners> listeners = new ArrayList<>();
+    private final String firm;
 
-    public ControllerCurrency() {
+    public ControllerCurrency(String firm) {
         view = new Currency_GUI();
         service = new ServiceCurrency();
+        this.firm=firm;
         initView();
         initControll();
     }
@@ -29,6 +31,7 @@ public final class ControllerCurrency {
     }
 
     public void initView() {
+        view.getjLab_Firm().setText(firm+" - Pénznemek");
         service.getAllCurrency(view.getjTab_Currencies());
         view.setLocationRelativeTo(null);
         view.getRootPane().setBorder(BorderFactory.createMatteBorder(4, 4, 4, 4, Color.GRAY));
@@ -39,7 +42,7 @@ public final class ControllerCurrency {
         view.getjB_New().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ControllerCurrencyNew controller = new ControllerCurrencyNew();
+                ControllerCurrencyNew controller = new ControllerCurrencyNew(firm);
 
             }
         });
@@ -52,7 +55,7 @@ public final class ControllerCurrency {
                     int row = view.getjTab_Currencies().getSelectedRow();
                     String value = view.getjTab_Currencies().getValueAt(row, 0).toString();
 
-                    ControllerCurrencyEdit controll = new ControllerCurrencyEdit();
+                    ControllerCurrencyEdit controll = new ControllerCurrencyEdit(firm);
                     listeners.removeAll(listeners);
                     listeners.add((CurrencyListeners) controll);
                     listeners.get(0).updateData(service.getOneCurrency(value));

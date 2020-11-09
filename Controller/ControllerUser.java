@@ -1,5 +1,10 @@
 package InvoiceProgram.Controller;
 
+import InvoiceProgram.Logger.InvoiceLog;
+import InvoiceProgram.Model.Firm;
+import InvoiceProgram.Model.User;
+import InvoiceProgram.Service.DatabaseConnection;
+import InvoiceProgram.Service.ServiceFirm;
 import InvoiceProgram.Service.ServiceUser;
 import InvoiceProgram.View.UserLogin;
 import java.awt.Image;
@@ -12,6 +17,12 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.security.NoSuchAlgorithmException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -21,12 +32,27 @@ public class ControllerUser {
 
     private final UserLogin view;
     private final ServiceUser service;
-
-    public ControllerUser(UserLogin view, ServiceUser service) {
+    private InvoiceLog log= new InvoiceLog();
+    private ArrayList<UserListeners> listeners = new ArrayList<>();
+    public ControllerUser(UserLogin view, ServiceUser service)  {
         this.view = view;
         this.service = service;
-        initView();
+        
         initControll();
+        if (!checkDBExists("invoiceprogram")) {
+            System.out.println("Adatbázis létrehozása...");
+             DatabaseConnection db= new DatabaseConnection();
+             db.scriptRunner();
+             System.out.println("Az adatbázis használatra kész!");
+             initView();
+             JOptionPane.showMessageDialog(view, "A program készen áll az első használatra! Felhasználónév: Admin Jelszó: Admin");
+             
+        }
+        else{
+            initView();
+            System.out.println("Az adatbázis létezik");
+        }
+        
     }
 
     public final void initView() {
@@ -38,7 +64,12 @@ public class ControllerUser {
         view.getjBt_Login().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                try {
                     userLogin();
+                } catch (NoSuchAlgorithmException ex) {
+                    log.log(Level.SEVERE, ex.getMessage());
+                    Logger.getLogger(ControllerUser.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
 
         });
@@ -134,7 +165,11 @@ public class ControllerUser {
             @Override
             public void keyPressed(KeyEvent e) {
                  if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    userLogin();
+                     try {
+                         userLogin();
+                     } catch (NoSuchAlgorithmException ex) {
+                         Logger.getLogger(ControllerUser.class.getName()).log(Level.SEVERE, null, ex);
+                     }
                 }
             }
 
@@ -149,7 +184,7 @@ public class ControllerUser {
     ;
     
     private void scaleImage(JLabel label) {
-        ImageIcon icon = new ImageIcon("C:\\Users\\ACER\\Documents\\NetBeansProjects\\InviceProgram\\src\\main\\java\\Images\\Login-icon.png");
+        ImageIcon icon = new ImageIcon("src\\main\\java\\Images\\Login-icon.png");
         Image img = icon.getImage();
         Image imgScale = img.getScaledInstance(label.getWidth(), label.getHeight(), Image.SCALE_SMOOTH);
         ImageIcon scaledIcon = new ImageIcon(imgScale);
@@ -157,7 +192,7 @@ public class ControllerUser {
 
     }
     
-    private void userLogin(){
+    private void userLogin() throws NoSuchAlgorithmException{
         
                 if (view.getjTF_username().getText().isEmpty() && view.getjPF_password().getText().isEmpty()) {
                     JOptionPane.showMessageDialog(view, "Minden mező kitöltése kötelező!", "Figyelem", JOptionPane.ERROR_MESSAGE);
@@ -167,9 +202,23 @@ public class ControllerUser {
                     JOptionPane.showMessageDialog(view, "A jelszó kitöltése kötelező!", "Figyelem", JOptionPane.ERROR_MESSAGE);
                 } else {
                     if (service.isValidUser(view.getjTF_username().getText(), view.getjPF_password().getText())) {
+                        User user= service.getOneUserId(view.getjTF_username().getText(), view.getjPF_password().getText());
+                        int id= user.getId();
                         JOptionPane.showMessageDialog(view, "Sikeres bejelentkezés!");
                         view.dispose();
-                        ControllerMainMenu controllerMainMenu = new ControllerMainMenu();
+                        ServiceFirm sf= new ServiceFirm();
+                        Firm firm = sf.getFirmToXML();
+                        ControllerMainMenu controllerMainMenu = new ControllerMainMenu(firm.getShorName());     
+                        listeners.removeAll(listeners);
+                        listeners.add((UserListeners) controllerMainMenu);
+                        listeners.get(0).updateData(id, (view.getjTF_username().getText()));
+                        
+                        if (firm==null) {
+                         ControllerFirmNew controller= new   ControllerFirmNew();
+                         
+                         log.log(Level.SEVERE, "Sikeres bejelentkezés: "+view.getjTF_username().getText());
+                        
+                        }
                         
                     } else {
                         JOptionPane.showMessageDialog(view, "Sikertelen bejelentkezés!", "Figyelem", JOptionPane.ERROR_MESSAGE);
@@ -178,5 +227,37 @@ public class ControllerUser {
                     }
 
                 }
+    }
+    
+    public boolean checkDBExists(String dbName){
+
+    try {
+        DatabaseConnection db= new DatabaseConnection();
+        
+        System.out.println("Creating a connection...");
+        Connection conn = db.getConnection(); //Open a connection
+    
+        ResultSet resultSet = conn.getMetaData().getCatalogs();
+        
+        while (resultSet.next()) {
+        
+          String databaseName = resultSet.getString(1);
+            if(databaseName.equals(dbName)){
+                return true;
+            }
+        }
+        resultSet.close();
+
+    }
+    catch(Exception e){
+        e.printStackTrace();
+    }
+    
+    return false;
+}
+    
+    public interface UserListeners {
+
+        public void updateData(int id, String user);
     }
 }

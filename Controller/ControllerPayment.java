@@ -1,8 +1,9 @@
 package InvoiceProgram.Controller;
 
-import InvoiceProgram.Model.TaxYear;
-import InvoiceProgram.Service.ServiceTaxYear;
-import InvoiceProgram.View.TaxYear_GUI;
+import InvoiceProgram.Controller.ControllerNewPayment.PaymentEditListeners;
+import InvoiceProgram.Model.Payment;
+import InvoiceProgram.Service.ServicePayment;
+import InvoiceProgram.View.Payment_GUI;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,62 +11,70 @@ import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.JOptionPane;
 
-public class ControllerTaxYear {
+public class ControllerPayment implements PaymentEditListeners {
+    
+    private final Payment_GUI view;
+    private final ServicePayment service;
+    private ArrayList<PaymentListeners> listeners = new ArrayList<>();
+    private final String firm;
 
-    private final TaxYear_GUI view;
-    private final ServiceTaxYear service;
-    private ArrayList<TaxYearListeners> listeners = new ArrayList<>();
-    private String firm;
-
-    public ControllerTaxYear(String firm) {
-        view = new TaxYear_GUI();
-        service = new ServiceTaxYear();
+    public ControllerPayment(String firm) {
+        view = new Payment_GUI();
+        service = new ServicePayment();
         this.firm=firm;
         initView();
         initControll();
     }
 
     public void initView() {
-        view.getjLab_Firm().setText(firm+" - Adóévek");
-        service.getAllTaxYear(view.getjTab_TaxYear());
+        view.getjLab_Firm().setText(firm+" - Fizetési Módok");
+        service.getAllPayment(view.getjTab_Payment());
         view.setLocationRelativeTo(null);
         view.getRootPane().setBorder(BorderFactory.createMatteBorder(4, 4, 4, 4, Color.GRAY));
         view.setVisible(true);
     }
 
-    public interface TaxYearListeners {
+    @Override
+    public void updateData(boolean refreash) {
+        if (refreash) {
+            service.getAllPayment(view.getjTab_Payment());
+        }
+    }
 
-        public void updateData(ArrayList<TaxYear> list);
+    public interface PaymentListeners {
+
+        public void updateData(ArrayList<Payment> list);
     }
 
     public void initControll() {
-        view.getjBut_New().addActionListener(new ActionListener() {
+        view.getjBut_Save().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ControllerTaxYearNew controller = new ControllerTaxYearNew(firm);
+                ControllerNewPayment controll = new ControllerNewPayment(firm);
             }
         });
         view.getjBut_Edit().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                if (view.getjTab_TaxYear().getSelectionModel().isSelectionEmpty()) {
+                if (view.getjTab_Payment().getSelectionModel().isSelectionEmpty()) {
                     JOptionPane.showMessageDialog(view, "Válasszon ki egy elemet a listából!", "Figyelem", JOptionPane.ERROR_MESSAGE);
                 } else {
-                    int row = view.getjTab_TaxYear().getSelectedRow();
-                    int value = Integer.parseInt(view.getjTab_TaxYear().getValueAt(row, 0).toString());
-                    ControllerTaxYearEdit controll = new ControllerTaxYearEdit(firm);
-                    listeners.removeAll(listeners);
-                    listeners.add((TaxYearListeners) controll);
-                    listeners.get(0).updateData(service.getOneTaxYear(view, value));
-                }
+                    int row = view.getjTab_Payment().getSelectedRow();
+                    String value = view.getjTab_Payment().getValueAt(row, 0).toString();
 
+                    ControllerPaymentEdit controll = new ControllerPaymentEdit(firm);
+                    listeners.removeAll(listeners);
+                    listeners.add((PaymentListeners) controll);
+                    listeners.get(0).updateData(service.getOnePayment(value));
+
+                }
             }
         });
         view.getjBut_Delete().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (view.getjTab_TaxYear().getSelectionModel().isSelectionEmpty()) {
+                if (view.getjTab_Payment().getSelectionModel().isSelectionEmpty()) {
                     JOptionPane.showMessageDialog(view, "Válasszon ki egy elemet a listából!", "Figyelem", JOptionPane.ERROR_MESSAGE);
                 } else {
                     Object[] options = {"Igen",
@@ -79,16 +88,12 @@ public class ControllerTaxYear {
                             options,
                             options[0]);
                     if (n == 0) {
-                        int row = view.getjTab_TaxYear().getSelectedRow();
-                        int value = Integer.parseInt(view.getjTab_TaxYear().getValueAt(row, 0).toString());
-                        if (service.isTaxYearInUse(value)) {
-                            JOptionPane.showMessageDialog(view, "Az adóév nem törölhető, mert már állítottak ki számlát ezen időszakra!", "Figyelem", JOptionPane.ERROR_MESSAGE);
-                        }else{
-                        service.deleteTaxYear(view, value);
-                        }
+                        int row = view.getjTab_Payment().getSelectedRow();
+                        int value = Integer.parseInt(view.getjTab_Payment().getValueAt(row, 0).toString());
+                        service.deletePayment(view, value);
                     }
 
-                    service.getAllTaxYear(view.getjTab_TaxYear());
+                    service.getAllPayment(view.getjTab_Payment());
                 }
             }
         });
@@ -98,5 +103,6 @@ public class ControllerTaxYear {
                 view.dispose();
             }
         });
+
     }
 }

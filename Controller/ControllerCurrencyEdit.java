@@ -9,21 +9,25 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import javax.swing.BorderFactory;
+import javax.swing.JOptionPane;
 
 public class ControllerCurrencyEdit implements CurrencyListeners {
 
     private final CurrencyEdit view;
     private final ServiceCurrency service;
+    private final String firm;
 
-    public ControllerCurrencyEdit() {
+    public ControllerCurrencyEdit(String firm) {
         view = new CurrencyEdit();
         service = new ServiceCurrency();
+        this.firm = firm;
         initView();
         initControll();
     }
 
     public final void initView() {
-
+        view.getjLab_Firm().setText(firm + " - Pénznem módosítás");
+        view.getjTF_id().setEditable(false);
         view.setLocationRelativeTo(null);
         view.getRootPane().setBorder(BorderFactory.createMatteBorder(4, 4, 4, 4, Color.GRAY));
         view.setVisible(true);
@@ -36,8 +40,14 @@ public class ControllerCurrencyEdit implements CurrencyListeners {
                 String id = view.getjTF_id().getText();
                 String name = view.getjTF_name().getText();
                 boolean isactive = view.getjCB_Active().isSelected();
-                service.updateLanguage(view, id, name, isactive);
-                view.dispose();
+
+                if (!name.isEmpty()) {
+                    service.updateLanguage(view, id, name, isactive);
+                    view.dispose();
+                } else {
+                    JOptionPane.showMessageDialog(view, "A megnevezés megadása kötelező", "Figyelem", JOptionPane.ERROR_MESSAGE);
+                }
+
             }
         });
         view.getjB_EXIT().addActionListener(new ActionListener() {

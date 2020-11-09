@@ -12,22 +12,26 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JOptionPane;
 
 public class ControllerPublicPlaceNew implements PublicPlaceListeners {
 
     private final PublicPlaceNew view;
     private final ServicePublicPlace service;
+    private final String firm;
 
-    public ControllerPublicPlaceNew() {
+    public ControllerPublicPlaceNew(String firm) {
         view = new PublicPlaceNew();
         service = new ServicePublicPlace();
+        this.firm=firm;
         initView();
         initControll();
     }
 
     private void initView() {
+        view.getjLab_Firm().setText(firm+" - Új Közterület jelleg");
         ServiceCountry serviceCountry = new ServiceCountry();
-        loadCountriesToJComboBox(serviceCountry.getAllCountry());
+        loadCountriesToJComboBox(serviceCountry.getAllActiveCountry());
         view.setLocationRelativeTo(null);
         view.getRootPane().setBorder(BorderFactory.createMatteBorder(4, 4, 4, 4, Color.GRAY));
         view.setVisible(true);
@@ -39,7 +43,12 @@ public class ControllerPublicPlaceNew implements PublicPlaceListeners {
             public void actionPerformed(ActionEvent e) {
                 String countryId = view.getjCB_Countries().getSelectedItem().toString();
                 String name = view.getjTF_name().getText();
-                service.newPublicPlace(view, countryId, name);
+                if (name.isEmpty()) {
+                     JOptionPane.showMessageDialog(view, "A megnevezés megadása kötelező!", "Figyelem", JOptionPane.ERROR_MESSAGE);
+                }else{
+                        service.newPublicPlace(view, countryId, name);
+                }
+                    
             }
         });
         view.getjB_EXIT().addActionListener(new ActionListener() {

@@ -18,15 +18,18 @@ public class ControllerLanguage {
     private final Language_GUI view;
     private final ServiceLanguage service;
     private ArrayList<LanguageListeners> listeners = new ArrayList<>();
+    private final String firm;
 
-    public ControllerLanguage() {
+    public ControllerLanguage(String firm) {
         view = new Language_GUI();
         service = new ServiceLanguage();
+        this.firm=firm;
         initView();
         initControll();
     }
 
     public final void initView() {
+        view.getjLab_Firm().setText(firm+" - Nyelvek");
         service.getAllLanguage(view.getjTab_Languages());
         view.setLocationRelativeTo(null);
         view.getRootPane().setBorder(BorderFactory.createMatteBorder(4, 4, 4, 4, Color.GRAY));
@@ -42,7 +45,7 @@ public class ControllerLanguage {
         view.getjB_New().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ControllerLanguageNew controller = new ControllerLanguageNew();
+                ControllerLanguageNew controller = new ControllerLanguageNew(firm);
                 service.getAllLanguage(view.getjTab_Languages());
             }
         });
@@ -55,7 +58,7 @@ public class ControllerLanguage {
                     int row = view.getjTab_Languages().getSelectedRow();
                     String value = view.getjTab_Languages().getValueAt(row, 0).toString();
 
-                    ControllerLanguageEdit controll = new ControllerLanguageEdit();
+                    ControllerLanguageEdit controll = new ControllerLanguageEdit(firm);
                     listeners.removeAll(listeners);
                     listeners.add(controll);
                     listeners.get(0).updateData(service.getOneLanguage(value));

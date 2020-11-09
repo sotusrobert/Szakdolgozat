@@ -1,8 +1,9 @@
+
 package InvoiceProgram.Controller;
 
-import InvoiceProgram.Model.Bank;
-import InvoiceProgram.Service.ServiceBank;
-import InvoiceProgram.View.Bank_GUI;
+import InvoiceProgram.Model.InvoiceAddress;
+import InvoiceProgram.Service.ServiceInvoice;
+import InvoiceProgram.View.FinalizedInvoice;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,65 +11,68 @@ import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.JOptionPane;
 
-public class ControllerBank {
-
-    private final Bank_GUI view;
-    private final ServiceBank service;
-    private final ArrayList<BankListeners> listeners = new ArrayList<>();
-    private final String firm;
-
-    public ControllerBank(String firm) {
-        view = new Bank_GUI();
-        service = new ServiceBank();
+public class ControllerFinalizedInvoice {
+    private final FinalizedInvoice view;
+    private final ServiceInvoice service;
+    private ArrayList<InvoiceAddressListeners> listeners = new ArrayList<>();
+    private String firm;
+    
+    public ControllerFinalizedInvoice(String firm) {
+        view= new FinalizedInvoice();
+        service = new ServiceInvoice();
         this.firm=firm;
         initView();
         initControll();
     }
-
+    
     public void initView() {
-        view.getjLab_Firm().setText(firm+" - Bankok");
-        service.getAllBank(view.getjTab_Bank());
+        view.getjLab_Firm().setText(firm+" - Véglegesített számlák");
+        service.getAllInvoice(view.getjTab_FinalizedInvoices());
         view.setLocationRelativeTo(null);
         view.getRootPane().setBorder(BorderFactory.createMatteBorder(4, 4, 4, 4, Color.GRAY));
         view.setVisible(true);
     }
-    public interface BankListeners {
+    
+    public interface InvoiceAddressListeners {
 
-        public void updateData(ArrayList<Bank> list);
+        public void updateData(ArrayList<InvoiceAddress> list);
     }
+    
     public void initControll() {
         view.getjBut_New().addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-                ControllerBankNew controller = new ControllerBankNew(firm);
+                ControllerInvoiceFileSelect controller= new ControllerInvoiceFileSelect(firm);
             }
         });
         view.getjBut_Edit().addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (view.getjTab_Bank().getSelectionModel().isSelectionEmpty()) {
+                if (view.getjTab_FinalizedInvoices().getSelectionModel().isSelectionEmpty()) {
                     JOptionPane.showMessageDialog(view, "Válasszon ki egy elemet a listából!", "Figyelem", JOptionPane.ERROR_MESSAGE);
                 } else {
-                    int row = view.getjTab_Bank().getSelectedRow();
-                    int value = Integer.parseInt(view.getjTab_Bank().getValueAt(row, 0).toString());
-                    ControllerBankEdit controll = new ControllerBankEdit(firm);
+                    int row = view.getjTab_FinalizedInvoices().getSelectedRow();
+                    int value = Integer.parseInt(view.getjTab_FinalizedInvoices().getValueAt(row, 0).toString());
+                    ControllerInvoiceEdit controll = new ControllerInvoiceEdit(firm);
                     listeners.removeAll(listeners);
-                    listeners.add((BankListeners) controll);
-                    listeners.get(0).updateData(service.getOneBank(view, value));
+                    listeners.add((InvoiceAddressListeners) controll);
+                    ArrayList<InvoiceAddress> list= new ArrayList<>();
+                    list.add(service.getOneInvoiceAddress(view, value));
+                    listeners.get(0).updateData(list);
                 }
                 
             }
         });
-        view.getjBut_Delete().addActionListener(new ActionListener(){
+        view.getjBut_Invalidate().addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (view.getjTab_Bank().getSelectionModel().isSelectionEmpty()) {
+                if (view.getjTab_FinalizedInvoices().getSelectionModel().isSelectionEmpty()) {
                     JOptionPane.showMessageDialog(view, "Válasszon ki egy elemet a listából!", "Figyelem", JOptionPane.ERROR_MESSAGE);
                 } else {
                     Object[] options = {"Igen",
                         "Nem"};
                     int n = JOptionPane.showOptionDialog(view,
-                            "Valóban törölni akarja a rekordot?",
+                            "Valóban érvényteleníteni akarja a számlát?",
                             "Figyelem",
                             JOptionPane.YES_NO_OPTION,
                             JOptionPane.QUESTION_MESSAGE,
@@ -76,12 +80,12 @@ public class ControllerBank {
                             options,
                             options[0]);
                     if (n == 0) {
-                        int row = view.getjTab_Bank().getSelectedRow();
-                        int value = Integer.parseInt(view.getjTab_Bank().getValueAt(row, 0).toString());
-                        service.deleteBank(view, value);
+                        int row = view.getjTab_FinalizedInvoices().getSelectedRow();
+                        int value = Integer.parseInt(view.getjTab_FinalizedInvoices().getValueAt(row, 0).toString());
+                        //service.deleteBank(view, value);
                     }
 
-                    service.getAllBank(view.getjTab_Bank());
+                    //service.getAllBank(view.getjTab_FinalizedInvoices());
                 }
             }
         });
@@ -92,4 +96,5 @@ public class ControllerBank {
             }
         });
     }
+    
 }
