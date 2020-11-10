@@ -71,7 +71,7 @@ public class Tax {
 
     @Override
     public String toString() {
-        return "Tax{" + "id=" + id + ", name=" + name + ", shortName=" + shortName + ", rate=" + rate + ", validFrom=" + validFrom + ", validUntil=" + validUntil + '}';
+        return rate + "[%]";
     }
     
     

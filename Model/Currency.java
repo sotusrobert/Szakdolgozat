@@ -23,9 +23,21 @@ public class Currency {
         return isActive;
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setIsActive(boolean isActive) {
+        this.isActive = isActive;
+    }
+
     @Override
     public String toString() {
-        return "Currency{" + "id=" + id + ", name=" + name + ", isActive=" + isActive + '}';
+        return id;
     }
     
     

@@ -1,39 +1,35 @@
 package InvoiceProgram.Service;
 
-import InvoiceProgram.Model.Language;
-import InvoiceProgram.View.LanguageEdit;
+import InvoiceProgram.Model.TransactionType;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
-public class ServiceLanguage {
+public class ServiceTransactionType {
 
-    private ArrayList<Language> languages;
+    private ArrayList<TransactionType> transactions;
 
-    public void getAllLanguage(JTable table) {
-        languages = new ArrayList<>();
+    public void getAllTransactionType(JTable table) {
+        transactions = new ArrayList<>();
         Connection conn = null;
         DatabaseConnection db = new DatabaseConnection();
         try {
 
             conn = db.getConnection();
-            String sql = "Select * From language order by isactive DESC";
+            String sql = "SELECT * FROM `transactiontype";
             PreparedStatement pst = conn.prepareStatement(sql);
             ResultSet rs = pst.executeQuery();
             try {
                 while (rs.next()) {
-                    languages.add(new Language(rs.getString("id"), rs.getString("nyelv"), rs.getBoolean("isactive")));
+                    transactions.add(new TransactionType(rs.getInt("id"), rs.getString("name"), rs.getBoolean("isactive")));
 
                 }
 
@@ -42,10 +38,11 @@ public class ServiceLanguage {
                 table.revalidate();
 
                 Object[] row = new Object[3];
-                for (int i = 0; i < languages.size(); i++) {
-                    row[0] = languages.get(i).getId();
-                    row[1] = languages.get(i).getNyelv().toUpperCase();
-                    row[2] = languages.get(i).isActive();
+                for (int i = 0; i < transactions.size(); i++) {
+                    row[0] = transactions.get(i).getId();
+                    row[1] = transactions.get(i).getName().toUpperCase();
+                    row[2] = transactions.get(i).isIsactive();
+
                     model.addRow(row);
 
                 }
@@ -66,54 +63,19 @@ public class ServiceLanguage {
         }
     }
 
-    public ArrayList<Language> getAllLanguage() {
-        ArrayList<Language> list = new ArrayList<>();
+    public ArrayList<TransactionType> getAllTransactionType() {
+        ArrayList<TransactionType> list = new ArrayList<>();
         Connection conn = null;
         DatabaseConnection db = new DatabaseConnection();
         try {
 
             conn = db.getConnection();
-            String sql = "Select * From language order by isactive DESC";
+            String sql = "SELECT * FROM `transactiontype";
             PreparedStatement pst = conn.prepareStatement(sql);
             ResultSet rs = pst.executeQuery();
             try {
                 while (rs.next()) {
-                    list.add(new Language(rs.getString("id"), rs.getString("nyelv"), rs.getBoolean("isactive")));
-
-                }
-                return list;
-
-            } catch (SQLException ex) {
-                Logger.getLogger(ServiceUser.class.getName()).log(Level.SEVERE, null, ex);
-            } finally {
-                if (conn != null) {
-                    try {
-                        conn.close();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(ServiceLanguage.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return list;
-    }
-
-    public ArrayList<Language> getOneLanguage(String id) {
-        ArrayList<Language> list = new ArrayList<>();
-        Connection conn = null;
-        DatabaseConnection db = new DatabaseConnection();
-        try {
-
-            conn = db.getConnection();
-            String sql = "SELECT * FROM `language` WHERE id = ?";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setString(1, id);
-            ResultSet rs = pst.executeQuery();
-            try {
-                while (rs.next()) {
-                    list.add(new Language(rs.getString("id"), rs.getString("nyelv"), rs.getBoolean("isactive")));
+                    list.add(new TransactionType(rs.getInt("id"), rs.getString("name"), rs.getBoolean("isactive")));
 
                 }
 
@@ -136,55 +98,55 @@ public class ServiceLanguage {
         return list;
     }
 
-    public void deleteLanguage(JFrame view, String id) {
+    public ArrayList<TransactionType> getOneTransactionType(String id) {
+        ArrayList<TransactionType> list = new ArrayList<>();
         Connection conn = null;
         DatabaseConnection db = new DatabaseConnection();
         try {
 
             conn = db.getConnection();
-            String sql = "DELETE FROM `language` WHERE id = ?";
+            String sql = "SELECT * FROM `transactiontype` WHERE id=  ?";
             PreparedStatement pst = conn.prepareStatement(sql);
             pst.setString(1, id);
+            ResultSet rs = pst.executeQuery();
+            try {
+                while (rs.next()) {
+                    list.add(new TransactionType(rs.getInt("id"), rs.getString("name"), rs.getBoolean("isactive")));
 
-            int rs = pst.executeUpdate();
+                }
 
-            if (rs == 1) {
-                JOptionPane.showMessageDialog(view, "A rekord eltávolítása sikeres!", "Adat eltávolítás", JOptionPane.INFORMATION_MESSAGE);
+                return list;
 
-                conn.close();
-
-            } else {
-                JOptionPane.showMessageDialog(view, "Az rekord eltávolítása nem sikerült!", "Figyelem", JOptionPane.ERROR_MESSAGE);
-            }
-
-        } catch (SQLException ex) {
-            Logger.getLogger(ServiceUser.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
+            } catch (SQLException ex) {
+                Logger.getLogger(ServiceUser.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                if (conn != null) {
+                    try {
+                        conn.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
-
+        } catch (SQLException ex) {
+            Logger.getLogger(ServiceLanguage.class.getName()).log(Level.SEVERE, null, ex);
         }
+        return list;
     }
 
-    public void newLanguage(JFrame view, String id, String name, boolean active) {
+    public void newTransactionType(JFrame view, String name, boolean isactive) {
         Connection conn = null;
         DatabaseConnection db = new DatabaseConnection();
         try {
 
             conn = db.getConnection();
-            String sql = "INSERT INTO `language`(`id`, `nyelv`, `isactive`) VALUES (?,?,?)";
+            String sql = "INSERT INTO `transactiontype`(`name`, `isactive`) VALUES ( ? , ?  )";
             PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setString(1, id);
-            pst.setString(2, name);
-            if (active) {
-                pst.setInt(3, 1);
+            pst.setString(1, name);
+            if (isactive) {
+                pst.setInt(2, 1);
             } else {
-                pst.setInt(3, 0);
+                pst.setInt(2, 0);
             }
             int rs = pst.executeUpdate();
 
@@ -211,22 +173,22 @@ public class ServiceLanguage {
         }
     }
 
-    public void updateLanguage(LanguageEdit view, String id, String name, boolean active) {
+    public void updateTransactionType(JFrame view, String name, boolean isactive, int id) {
         Connection conn = null;
         DatabaseConnection db = new DatabaseConnection();
         try {
 
             conn = db.getConnection();
-            String sql = "UPDATE `language` SET `id`=? ,`nyelv`=? ,`isactive`=? WHERE `id`=? ";
+            String sql = "UPDATE `transactiontype` SET `name`= ? ,`isactive`= ?  WHERE id = ?  ";
             PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setString(1, id);
-            pst.setString(2, name);
-            if (active) {
-                pst.setInt(3, 1);
+            pst.setString(1, name);
+
+            if (isactive) {
+                pst.setInt(2, 1);
             } else {
-                pst.setInt(3, 0);
+                pst.setInt(2, 0);
             }
-            pst.setString(4, id);
+            pst.setInt(3, id);
             int rs = pst.executeUpdate();
 
             if (rs == 1) {
@@ -252,24 +214,59 @@ public class ServiceLanguage {
         }
     }
 
-    public Language getOneLanguageById(String id) {
-        Language list = null;
+    public void deleteTransactionType(JFrame view, int id) {
         Connection conn = null;
         DatabaseConnection db = new DatabaseConnection();
         try {
 
             conn = db.getConnection();
-            String sql = "SELECT * FROM `language` WHERE id = ?";
+            String sql = "DELETE FROM `transactiontype` WHERE id = ?";
             PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setString(1, id);
+            pst.setInt(1, id);
+
+            int rs = pst.executeUpdate();
+
+            if (rs == 1) {
+                JOptionPane.showMessageDialog(view, "A rekord eltávolítása sikeres!", "Adat eltávolítás", JOptionPane.INFORMATION_MESSAGE);
+
+                conn.close();
+
+            } else {
+                JOptionPane.showMessageDialog(view, "Az rekord eltávolítása nem sikerült!", "Figyelem", JOptionPane.ERROR_MESSAGE);
+            }
+
+        } catch (SQLException ex) {
+            Logger.getLogger(ServiceUser.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+    }
+
+    public TransactionType getOneTransactionById(int id) {
+        TransactionType transactions = null;
+        Connection conn = null;
+        DatabaseConnection db = new DatabaseConnection();
+        try {
+
+            conn = db.getConnection();
+            String sql = "SELECT * FROM `transactiontype` where id = ?";
+            PreparedStatement pst = conn.prepareStatement(sql);
+            pst.setInt(1, id);
             ResultSet rs = pst.executeQuery();
             try {
                 while (rs.next()) {
-                    list = new Language(rs.getString("id"), rs.getString("nyelv"), rs.getBoolean("isactive"));
+                    transactions = new TransactionType(rs.getInt("id"), rs.getString("name"), rs.getBoolean("isactive"));
 
                 }
 
-                return list;
+                return transactions;
 
             } catch (SQLException ex) {
                 Logger.getLogger(ServiceUser.class.getName()).log(Level.SEVERE, null, ex);
@@ -285,53 +282,6 @@ public class ServiceLanguage {
         } catch (SQLException ex) {
             Logger.getLogger(ServiceLanguage.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return list;
-    }
-
-    public boolean isAvailableLanguage(String id) {
-
-        Connection conn = null;
-        DatabaseConnection db = new DatabaseConnection();
-        try {
-
-            conn = db.getConnection();
-            String sql = "SELECT * FROM `language` WHERE id = ?";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setString(1, id);
-            ResultSet rs = pst.executeQuery();
-            try {
-                if (rs.next()) {
-                    return true;
-
-                }
-
-            } catch (SQLException ex) {
-                Logger.getLogger(ServiceUser.class.getName()).log(Level.SEVERE, null, ex);
-            } finally {
-                if (conn != null) {
-                    try {
-                        conn.close();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(ServiceLanguage.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return false;
-    }
-
-    public boolean isValidId(String code) {
-        String regex = "(?=.*[A-Z]).{2}";
-        Pattern p = Pattern.compile(regex);
-
-        if (code == null) {
-            return false;
-        }
-        Matcher m = p.matcher(code);
-
-        return m.matches();
-
+        return transactions;
     }
 }

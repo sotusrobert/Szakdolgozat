@@ -11,8 +11,9 @@ public class Address {
     private  String stairWay;
     private  String storey;
     private  int doornumber;
+    private String district;
 
-    public Address(Country country, String regio, Zipcode zip, String publicPlaceName, PublicPlace publicPlaceKind, int publicPlaceNumber, String building, String stairWay, String storey, int doornumber) {
+    public Address(Country country, String regio, Zipcode zip, String publicPlaceName, PublicPlace publicPlaceKind, int publicPlaceNumber, String building, String stairWay, String storey, int doornumber, String district) {
         this.country = country;
         this.regio = regio;
         this.zip = zip;
@@ -23,6 +24,7 @@ public class Address {
         this.stairWay = stairWay;
         this.storey = storey;
         this.doornumber = doornumber;
+        this.district=district;
     }
 
     public Country getCountry() {
@@ -106,6 +108,14 @@ public class Address {
         this.doornumber = doornumber;
     }
 
+    public String getDistrict() {
+        return district;
+    }
+
+    public void setDistrict(String district) {
+        this.district = district;
+    }
+    
     @Override
     public String toString() {
         return "Address{" + "country=" + country.getName() +  ", regio=" + regio + ", city=" + zip.getName() + ", zip=" + zip.getCode() + ", publicPlaceName=" + publicPlaceName + ", publicPlaceKind=" + publicPlaceKind.getName() + ", publicPlaceNumber=" + publicPlaceNumber + ", building=" + building + ", stairWay=" + stairWay + ", storey=" + storey + ", doornumber=" + doornumber + '}';

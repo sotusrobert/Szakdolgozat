@@ -6,6 +6,7 @@ public class Zipcode {
     private String code;
     private String name;
 
+    
     public Zipcode(int id, String countryId, String code, String name) {
         this.id = id;
         this.countryId = countryId;

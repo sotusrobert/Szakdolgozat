@@ -2,13 +2,14 @@ package InvoiceProgram.Service;
 
 import InvoiceProgram.Model.Country;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -39,10 +40,10 @@ public class ServiceCountry {
 
         countries = new ArrayList<>();
         Connection conn = null;
+        DatabaseConnection db = new DatabaseConnection();
         try {
-            Class.forName("com.mysql.jdbc.Driver");
 
-            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/invoiceprogram", "root", "");
+            conn = db.getConnection();
             String sql = "Select * From country order by isactive DESC";
             PreparedStatement pst = conn.prepareStatement(sql);
             ResultSet rs = pst.executeQuery();
@@ -81,8 +82,6 @@ public class ServiceCountry {
             }
         } catch (SQLException ex) {
             Logger.getLogger(ServiceLanguage.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(ServiceLanguage.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -90,10 +89,10 @@ public class ServiceCountry {
 
         ArrayList<Country> list = new ArrayList<>();
         Connection conn = null;
+        DatabaseConnection db = new DatabaseConnection();
         try {
-            Class.forName("com.mysql.jdbc.Driver");
 
-            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/invoiceprogram", "root", "");
+            conn = db.getConnection();
             String sql = "Select * From country order by isactive DESC";
             PreparedStatement pst = conn.prepareStatement(sql);
             ResultSet rs = pst.executeQuery();
@@ -117,7 +116,40 @@ public class ServiceCountry {
             }
         } catch (SQLException ex) {
             Logger.getLogger(ServiceLanguage.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
+        }
+        return list;
+    }
+
+    public ArrayList<Country> getAllActiveCountry() {
+
+        ArrayList<Country> list = new ArrayList<>();
+        Connection conn = null;
+        DatabaseConnection db = new DatabaseConnection();
+        try {
+
+            conn = db.getConnection();
+            String sql = "Select * From country Where isactive=1 order by isactive DESC";
+            PreparedStatement pst = conn.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            try {
+                while (rs.next()) {
+                    list.add(new Country(rs.getString("id"), rs.getString("name"), rs.getString("languageId"), rs.getBoolean("isactive"), rs.getBoolean("isEUMembership")));
+
+                }
+
+                return list;
+            } catch (SQLException ex) {
+                Logger.getLogger(ServiceUser.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                if (conn != null) {
+                    try {
+                        conn.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        } catch (SQLException ex) {
             Logger.getLogger(ServiceLanguage.class.getName()).log(Level.SEVERE, null, ex);
         }
         return list;
@@ -126,10 +158,10 @@ public class ServiceCountry {
     public ArrayList<Country> getOneCountry(String id) {
         ArrayList<Country> list = new ArrayList<>();
         Connection conn = null;
+        DatabaseConnection db = new DatabaseConnection();
         try {
-            Class.forName("com.mysql.jdbc.Driver");
 
-            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/invoiceprogram", "root", "");
+            conn = db.getConnection();
             String sql = "SELECT * FROM `country` WHERE id = ?";
             PreparedStatement pst = conn.prepareStatement(sql);
             pst.setString(1, id);
@@ -155,8 +187,6 @@ public class ServiceCountry {
             }
         } catch (SQLException ex) {
             Logger.getLogger(ServiceLanguage.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(ServiceLanguage.class.getName()).log(Level.SEVERE, null, ex);
         }
         return list;
     }
@@ -164,17 +194,17 @@ public class ServiceCountry {
     public Country getOneCountryById(String id) {
         Country list = null;
         Connection conn = null;
+        DatabaseConnection db = new DatabaseConnection();
         try {
-            Class.forName("com.mysql.jdbc.Driver");
 
-            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/invoiceprogram", "root", "");
+            conn = db.getConnection();
             String sql = "SELECT * FROM `country` WHERE id = ?";
             PreparedStatement pst = conn.prepareStatement(sql);
             pst.setString(1, id);
             ResultSet rs = pst.executeQuery();
             try {
                 while (rs.next()) {
-                    list= new Country(rs.getString("id"), rs.getString("name"), rs.getString("languageId"), rs.getBoolean("isactive"), rs.getBoolean("isEUmembership"));
+                    list = new Country(rs.getString("id"), rs.getString("name"), rs.getString("languageId"), rs.getBoolean("isactive"), rs.getBoolean("isEUmembership"));
 
                 }
 
@@ -193,18 +223,16 @@ public class ServiceCountry {
             }
         } catch (SQLException ex) {
             Logger.getLogger(ServiceLanguage.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(ServiceLanguage.class.getName()).log(Level.SEVERE, null, ex);
         }
         return list;
     }
 
     public void deleteCountry(JFrame view, String id) {
         Connection conn = null;
+        DatabaseConnection db = new DatabaseConnection();
         try {
-            Class.forName("com.mysql.jdbc.Driver");
 
-            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/invoiceprogram", "root", "");
+            conn = db.getConnection();
             String sql = "DELETE FROM `country` WHERE id = ?";
             PreparedStatement pst = conn.prepareStatement(sql);
             pst.setString(1, id);
@@ -222,8 +250,6 @@ public class ServiceCountry {
 
         } catch (SQLException ex) {
             Logger.getLogger(ServiceUser.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(ServiceLanguage.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             if (conn != null) {
                 try {
@@ -238,10 +264,10 @@ public class ServiceCountry {
 
     public void newCountry(JFrame view, String id, String name, String language, boolean isactive, boolean EUmember) {
         Connection conn = null;
+        DatabaseConnection db = new DatabaseConnection();
         try {
-            Class.forName("com.mysql.jdbc.Driver");
 
-            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/invoiceprogram", "root", "");
+            conn = db.getConnection();
             String sql = "INSERT INTO `country`(`id`, `name`, `languageId`, `isactive`, `isEUMembership`) VALUES (?,?,?,?,?)";
             PreparedStatement pst = conn.prepareStatement(sql);
             pst.setString(1, id);
@@ -271,8 +297,6 @@ public class ServiceCountry {
 
         } catch (SQLException ex) {
             Logger.getLogger(ServiceUser.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(ServiceLanguage.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             if (conn != null) {
                 try {
@@ -288,10 +312,10 @@ public class ServiceCountry {
     public void updateCountry(JFrame view, String id, String name, String language, boolean isactive, boolean isEU) {
 
         Connection conn = null;
+        DatabaseConnection db = new DatabaseConnection();
         try {
-            Class.forName("com.mysql.jdbc.Driver");
 
-            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/invoiceprogram", "root", "");
+            conn = db.getConnection();
             String sql = "UPDATE `country` SET `id`=?,`name`=?,`languageId`=?,`isactive`=?,`isEUMembership`=? WHERE id=? ";
             PreparedStatement pst = conn.prepareStatement(sql);
             pst.setString(1, id);
@@ -321,8 +345,6 @@ public class ServiceCountry {
 
         } catch (SQLException ex) {
             Logger.getLogger(ServiceUser.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(ServiceLanguage.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             if (conn != null) {
                 try {
@@ -333,5 +355,52 @@ public class ServiceCountry {
             }
 
         }
+    }
+
+    public boolean isAvailableCountry(String id) {
+
+        Connection conn = null;
+        DatabaseConnection db = new DatabaseConnection();
+        try {
+
+            conn = db.getConnection();
+            String sql = "SELECT * FROM `country` WHERE id = ?";
+            PreparedStatement pst = conn.prepareStatement(sql);
+            pst.setString(1, id);
+            ResultSet rs = pst.executeQuery();
+            try {
+                while (rs.next()) {
+                    return true;
+
+                }
+
+            } catch (SQLException ex) {
+                Logger.getLogger(ServiceUser.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                if (conn != null) {
+                    try {
+                        conn.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ServiceLanguage.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return false;
+    }
+
+    public boolean isValidId(String code) {
+        String regex = "[A-Za-z]{2}";
+        Pattern p = Pattern.compile(regex);
+
+        if (code == null) {
+            return false;
+        }
+        Matcher m = p.matcher(code);
+
+        return m.matches();
+
     }
 }

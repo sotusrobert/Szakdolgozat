@@ -6,10 +6,10 @@ public class BankAccount {
     private String name;
     private Currency currency;
     private Bank bank;
-    private int number;
+    private String number;
     private boolean isActive;
 
-    public BankAccount(int id, String name, Currency currency, Bank bank, int number, boolean isActive) {
+    public BankAccount(int id, String name, Currency currency, Bank bank, String number, boolean isActive) {
         this.id = id;
         this.name = name;
         this.currency = currency;
@@ -50,11 +50,11 @@ public class BankAccount {
         this.bank = bank;
     }
 
-    public int getNumber() {
+    public String getNumber() {
         return number;
     }
 
-    public void setNumber(int number) {
+    public void setNumber(String number) {
         this.number = number;
     }
 
@@ -68,7 +68,7 @@ public class BankAccount {
 
     @Override
     public String toString() {
-        return "BankAccount{" + "id=" + id + ", name=" + name + ", currency=" + currency.getName() + ", bank=" + bank.getName() + ", number=" + number + ", isActive=" + isActive + '}';
+        return name +":"+number ;
     }
     
     

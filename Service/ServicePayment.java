@@ -1,8 +1,7 @@
 package InvoiceProgram.Service;
 
-import InvoiceProgram.Model.Tax;
+import InvoiceProgram.Model.Payment;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -16,23 +15,23 @@ import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
-public class ServiceTax {
+public class ServicePayment {
 
-    private ArrayList<Tax> taxes;
+    private ArrayList<Payment> payments;
 
-    public void getAllTaxCode(JTable table) {
-        taxes = new ArrayList<>();
+    public void getAllPayment(JTable table) {
+        payments = new ArrayList<>();
         Connection conn = null;
         DatabaseConnection db = new DatabaseConnection();
         try {
 
             conn = db.getConnection();
-            String sql = "Select * From tax ";
+            String sql = "SELECT * FROM `payment";
             PreparedStatement pst = conn.prepareStatement(sql);
             ResultSet rs = pst.executeQuery();
             try {
                 while (rs.next()) {
-                    taxes.add(new Tax(rs.getInt("id"), rs.getString("name"), rs.getString("shortName"), rs.getInt("rate"), rs.getDate("validFrom"), rs.getDate("validUntil")));
+                    payments.add(new Payment(rs.getInt("id"), rs.getString("name"), rs.getInt("prompt"), rs.getString("mode"), rs.getBoolean("isDefault")));
 
                 }
 
@@ -40,14 +39,14 @@ public class ServiceTax {
                 model.getDataVector().removeAllElements();
                 table.revalidate();
 
-                Object[] row = new Object[6];
-                for (int i = 0; i < taxes.size(); i++) {
-                    row[0] = taxes.get(i).getId();
-                    row[1] = taxes.get(i).getName().toUpperCase();
-                    row[2] = taxes.get(i).getShortName().toUpperCase();
-                    row[3] = String.format("%d [%%]", taxes.get(i).getRate());
-                    row[4] = taxes.get(i).getValidFrom();
-                    row[5] = taxes.get(i).getValidUntil();
+                Object[] row = new Object[5];
+                for (int i = 0; i < payments.size(); i++) {
+                    row[0] = payments.get(i).getId();
+                    row[1] = payments.get(i).getName().toUpperCase();
+                    row[2] = payments.get(i).getPrompt() + "[nap]";
+                    row[3] = payments.get(i).getMode().toUpperCase();
+                    row[4] = payments.get(i).isIsDefault();
+
                     model.addRow(row);
 
                 }
@@ -68,19 +67,19 @@ public class ServiceTax {
         }
     }
 
-    public ArrayList<Tax> getAllTaxCode() {
-        ArrayList<Tax> list = new ArrayList<>();
+    public ArrayList<Payment> getAllPayment() {
+        ArrayList<Payment> list = new ArrayList<>();
         Connection conn = null;
         DatabaseConnection db = new DatabaseConnection();
         try {
 
             conn = db.getConnection();
-            String sql = "Select * From tax ";
+            String sql = "SELECT * FROM `payment";
             PreparedStatement pst = conn.prepareStatement(sql);
             ResultSet rs = pst.executeQuery();
             try {
                 while (rs.next()) {
-                    list.add(new Tax(rs.getInt("id"), rs.getString("name"), rs.getString("shortName"), rs.getInt("rate"), rs.getDate("validFrom"), rs.getDate("validUntil")));
+                    list.add(new Payment(rs.getInt("id"), rs.getString("name"), rs.getInt("prompt"), rs.getString("mode"), rs.getBoolean("isDefault")));
 
                 }
                 return list;
@@ -102,19 +101,59 @@ public class ServiceTax {
         return list;
     }
 
-    public void newTax(JFrame view, String name, String shortName, int rate, Date validFrom, Date validUntil) {
+    public ArrayList<Payment> getOnePayment(String id) {
+        ArrayList<Payment> list = new ArrayList<>();
         Connection conn = null;
         DatabaseConnection db = new DatabaseConnection();
         try {
 
             conn = db.getConnection();
-            String sql = "INSERT INTO `tax`(`name`, `shortName`, `rate`, `validFrom`, `validUntil`) VALUES (?,?,?,?,?)";
+            String sql = "SELECT * FROM `payment` WHERE id=  ?";
+            PreparedStatement pst = conn.prepareStatement(sql);
+            pst.setString(1, id);
+            ResultSet rs = pst.executeQuery();
+            try {
+                while (rs.next()) {
+                    list.add(new Payment(rs.getInt("id"), rs.getString("name"), rs.getInt("prompt"), rs.getString("mode"), rs.getBoolean("isDefault")));
+
+                }
+
+                return list;
+
+            } catch (SQLException ex) {
+                Logger.getLogger(ServiceUser.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                if (conn != null) {
+                    try {
+                        conn.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ServiceLanguage.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return list;
+    }
+
+    public void newPayment(JFrame view, String name, int prompt, String mode, boolean isDefault) {
+        Connection conn = null;
+        DatabaseConnection db = new DatabaseConnection();
+        try {
+
+            conn = db.getConnection();
+            String sql = "INSERT INTO `payment`(`name`, `prompt`, `mode`, `isDefault`) VALUES ( ? , ? , ? , ? )";
             PreparedStatement pst = conn.prepareStatement(sql);
             pst.setString(1, name);
-            pst.setString(2, shortName);
-            pst.setInt(3, rate);
-            pst.setDate(4, (java.sql.Date) validFrom);
-            pst.setDate(5, (java.sql.Date) validUntil);
+            pst.setInt(2, prompt);
+            pst.setString(3, mode);
+
+            if (isDefault) {
+                pst.setInt(4, 1);
+            } else {
+                pst.setInt(4, 0);
+            }
             int rs = pst.executeUpdate();
 
             if (rs == 1) {
@@ -140,87 +179,58 @@ public class ServiceTax {
         }
     }
 
-    public ArrayList<Tax> getOneTax(String id) {
-        ArrayList<Tax> list = new ArrayList<>();
+    public void updatePayment(JFrame view, String name, int prompt, String mode, boolean isDefault, int id) {
         Connection conn = null;
         DatabaseConnection db = new DatabaseConnection();
         try {
 
             conn = db.getConnection();
-            String sql = "SELECT * FROM `tax` WHERE id = ?";
+            String sql = "UPDATE `payment` SET `name`= ? ,`prompt`= ? ,`mode`= ? ,`isDefault`= ?  WHERE id = ?  ";
             PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setString(1, id);
-            ResultSet rs = pst.executeQuery();
-            try {
-                while (rs.next()) {
-                    list.add(new Tax(rs.getInt("id"), rs.getString("name"), rs.getString("shortName"), rs.getInt("rate"), rs.getDate("validFrom"), rs.getDate("validUntil")));
+            pst.setString(1, name);
+            pst.setInt(2, prompt);
+            pst.setString(3, mode);
 
-                }
+            if (isDefault) {
+                pst.setInt(4, 1);
+            } else {
+                pst.setInt(4, 0);
+            }
+            pst.setInt(5, id);
+            int rs = pst.executeUpdate();
 
-                return list;
+            if (rs == 1) {
+                JOptionPane.showMessageDialog(view, "Sikeres módosítás!", "Adat módosítás", JOptionPane.INFORMATION_MESSAGE);
 
-            } catch (SQLException ex) {
-                Logger.getLogger(ServiceUser.class.getName()).log(Level.SEVERE, null, ex);
-            } finally {
-                if (conn != null) {
-                    try {
-                        conn.close();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
+                conn.close();
+
+            } else {
+                JOptionPane.showMessageDialog(view, "Az adatok módosítása nem sikerült!", "Figyelem", JOptionPane.ERROR_MESSAGE);
+            }
+
+        } catch (SQLException ex) {
+            Logger.getLogger(ServiceUser.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
             }
-        } catch (SQLException ex) {
-            Logger.getLogger(ServiceLanguage.class.getName()).log(Level.SEVERE, null, ex);
+
         }
-        return list;
     }
 
-    public Tax getOneTaxById(int id) {
-        Tax list = null;
+    public void deletePayment(JFrame view, int id) {
         Connection conn = null;
         DatabaseConnection db = new DatabaseConnection();
         try {
 
             conn = db.getConnection();
-            String sql = "SELECT * FROM `tax` WHERE id = ?";
+            String sql = "DELETE FROM `payment` WHERE id = ?";
             PreparedStatement pst = conn.prepareStatement(sql);
             pst.setInt(1, id);
-            ResultSet rs = pst.executeQuery();
-            try {
-                while (rs.next()) {
-                    list = new Tax(rs.getInt("id"), rs.getString("name"), rs.getString("shortName"), rs.getInt("rate"), rs.getDate("validFrom"), rs.getDate("validUntil"));
-
-                }
-
-                return list;
-
-            } catch (SQLException ex) {
-                Logger.getLogger(ServiceUser.class.getName()).log(Level.SEVERE, null, ex);
-            } finally {
-                if (conn != null) {
-                    try {
-                        conn.close();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(ServiceLanguage.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return list;
-    }
-
-    public void deleteTax(JFrame view, String id) {
-        Connection conn = null;
-        DatabaseConnection db = new DatabaseConnection();
-        try {
-
-            conn = db.getConnection();
-            String sql = "DELETE FROM `tax` WHERE id = ?";
-            PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setString(1, id);
 
             int rs = pst.executeUpdate();
 
@@ -247,46 +257,43 @@ public class ServiceTax {
         }
     }
 
-    public void updateLanguage(JFrame view, int Id, String name, String shortName, int rate, Date validFrom, Date validUntil) {
+    public Payment getOnePaymentById(int id) {
+        Payment payments = null;
         Connection conn = null;
         DatabaseConnection db = new DatabaseConnection();
         try {
 
             conn = db.getConnection();
-            String sql = "UPDATE `tax` SET `name`= ? ,`shortName`= ? ,`rate`= ? ,`validFrom`= ? ,`validUntil`= ?  WHERE id = ? ";
+            String sql = "SELECT * FROM `payment` where id = ?";
             PreparedStatement pst = conn.prepareStatement(sql);
-            pst.setString(1, name);
-            pst.setString(2, shortName);
-            pst.setInt(3, rate);
-            pst.setDate(4, (java.sql.Date) validFrom);
-            pst.setDate(5, (java.sql.Date) validUntil);
-            pst.setInt(6, Id);
-            int rs = pst.executeUpdate();
+            pst.setInt(1, id);
+            ResultSet rs = pst.executeQuery();
+            try {
+                while (rs.next()) {
+                    payments = new Payment(rs.getInt("id"), rs.getString("name"), rs.getInt("prompt"), rs.getString("mode"), rs.getBoolean("isDefault"));
 
-            if (rs == 1) {
-                JOptionPane.showMessageDialog(view, "Sikeres módosítás!", "Adat módosítás", JOptionPane.INFORMATION_MESSAGE);
+                }
 
-                conn.close();
+                return payments;
 
-            } else {
-                JOptionPane.showMessageDialog(view, "Az adatok módosítása nem sikerült!", "Figyelem", JOptionPane.ERROR_MESSAGE);
-            }
-
-        } catch (SQLException ex) {
-            Logger.getLogger(ServiceUser.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
+            } catch (SQLException ex) {
+                Logger.getLogger(ServiceUser.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                if (conn != null) {
+                    try {
+                        conn.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
-
+        } catch (SQLException ex) {
+            Logger.getLogger(ServiceLanguage.class.getName()).log(Level.SEVERE, null, ex);
         }
+        return payments;
     }
     
-    public boolean isValidRate(String code) {
+     public boolean isValidPrompt(String code) {
         String regex = "[0-9]+";
         Pattern p = Pattern.compile(regex);
 
@@ -298,5 +305,4 @@ public class ServiceTax {
         return m.matches();
 
     }
-
 }

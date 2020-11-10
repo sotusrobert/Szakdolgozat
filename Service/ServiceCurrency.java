@@ -9,6 +9,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -20,11 +22,11 @@ public class ServiceCurrency {
 
     public void getAllCurrency(JTable table) {
         currencies = new ArrayList<>();
-        Connection conn = null;
+        Connection conn = null;        DatabaseConnection db= new DatabaseConnection();
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            
 
-            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/invoiceprogram", "root", "");
+            conn=db.getConnection();
             String sql = "Select * From currency order by active DESC";
             PreparedStatement pst = conn.prepareStatement(sql);
             ResultSet rs = pst.executeQuery();
@@ -61,17 +63,15 @@ public class ServiceCurrency {
             }
         } catch (SQLException ex) {
             Logger.getLogger(ServiceLanguage.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(ServiceLanguage.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     public void newCurrency(JFrame view, String id, String name, boolean active) {
-        Connection conn = null;
+        Connection conn = null;        DatabaseConnection db= new DatabaseConnection();
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            
 
-            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/invoiceprogram", "root", "");
+            conn=db.getConnection();
             String sql = "INSERT INTO `currency`(`id`, `name`, `active`) VALUES (?,?,?)";
             PreparedStatement pst = conn.prepareStatement(sql);
             pst.setString(1, id);
@@ -94,8 +94,6 @@ public class ServiceCurrency {
 
         } catch (SQLException ex) {
             Logger.getLogger(ServiceUser.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(ServiceLanguage.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             if (conn != null) {
                 try {
@@ -110,11 +108,11 @@ public class ServiceCurrency {
 
     public ArrayList<Currency> getOneCurrency(String id) {
         ArrayList<Currency> list = new ArrayList<>();
-        Connection conn = null;
+        Connection conn = null;        DatabaseConnection db= new DatabaseConnection();
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            
 
-            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/invoiceprogram", "root", "");
+            conn=db.getConnection();
             String sql = "SELECT * FROM `currency` WHERE id=  ?";
             PreparedStatement pst = conn.prepareStatement(sql);
             pst.setString(1, id);
@@ -140,18 +138,52 @@ public class ServiceCurrency {
             }
         } catch (SQLException ex) {
             Logger.getLogger(ServiceLanguage.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
+        }
+        return list;
+    }
+
+    public Currency getOneCurrencyById(String id) {
+        Currency list = null;
+        Connection conn = null;        DatabaseConnection db= new DatabaseConnection();
+        try {
+            
+
+            conn=db.getConnection();
+            String sql = "SELECT * FROM `currency` WHERE id=  ?";
+            PreparedStatement pst = conn.prepareStatement(sql);
+            pst.setString(1, id);
+            ResultSet rs = pst.executeQuery();
+            try {
+                while (rs.next()) {
+                    list= new Currency(rs.getString("id"), rs.getString("name"), rs.getBoolean("active"));
+
+                }
+
+                return list;
+
+            } catch (SQLException ex) {
+                Logger.getLogger(ServiceUser.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                if (conn != null) {
+                    try {
+                        conn.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        } catch (SQLException ex) {
             Logger.getLogger(ServiceLanguage.class.getName()).log(Level.SEVERE, null, ex);
         }
         return list;
     }
 
     public void updateLanguage(JFrame view, String id, String name, boolean active) {
-        Connection conn = null;
+        Connection conn = null;        DatabaseConnection db= new DatabaseConnection();
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            
 
-            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/invoiceprogram", "root", "");
+            conn=db.getConnection();
             String sql = "UPDATE `currency` SET `name`=? ,`active`=? WHERE `id`=?  ";
             PreparedStatement pst = conn.prepareStatement(sql);
             pst.setString(1, name);
@@ -175,8 +207,6 @@ public class ServiceCurrency {
 
         } catch (SQLException ex) {
             Logger.getLogger(ServiceUser.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(ServiceLanguage.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             if (conn != null) {
                 try {
@@ -190,11 +220,11 @@ public class ServiceCurrency {
     }
 
     public void deleteCurrency(JFrame view, String id) {
-        Connection conn = null;
+        Connection conn = null;        DatabaseConnection db= new DatabaseConnection();
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            
 
-            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/invoiceprogram", "root", "");
+            conn=db.getConnection();
             String sql = "DELETE FROM `currency` WHERE id = ?";
             PreparedStatement pst = conn.prepareStatement(sql);
             pst.setString(1, id);
@@ -212,8 +242,6 @@ public class ServiceCurrency {
 
         } catch (SQLException ex) {
             Logger.getLogger(ServiceUser.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(ServiceLanguage.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             if (conn != null) {
                 try {
@@ -228,11 +256,11 @@ public class ServiceCurrency {
 
     public ArrayList<Currency> getAllCurrency() {
         ArrayList<Currency> list = new ArrayList<>();
-        Connection conn = null;
+        Connection conn = null;        DatabaseConnection db= new DatabaseConnection();
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            
 
-            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/invoiceprogram", "root", "");
+            conn=db.getConnection();
             String sql = "Select * From currency order by active DESC";
             PreparedStatement pst = conn.prepareStatement(sql);
             ResultSet rs = pst.executeQuery();
@@ -257,9 +285,126 @@ public class ServiceCurrency {
             }
         } catch (SQLException ex) {
             Logger.getLogger(ServiceLanguage.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
+        }
+        return null;
+    }
+    
+    public ArrayList<Currency> getAllActiveCurrency() {
+        ArrayList<Currency> list = new ArrayList<>();
+        Connection conn = null;        DatabaseConnection db= new DatabaseConnection();
+        try {
+            
+
+            conn=db.getConnection();
+            String sql = "Select * From currency where active = 1 order by active DESC";
+            PreparedStatement pst = conn.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            try {
+                while (rs.next()) {
+                    list.add(new Currency(rs.getString("id"), rs.getString("name"), rs.getBoolean("active")));
+
+                }
+
+                return list;
+
+            } catch (SQLException ex) {
+                Logger.getLogger(ServiceUser.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                if (conn != null) {
+                    try {
+                        conn.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        } catch (SQLException ex) {
             Logger.getLogger(ServiceLanguage.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
+    }
+    
+    public ArrayList<Currency> getAllCurrencyByIsActive() {
+        ArrayList<Currency> list = new ArrayList<>();
+        Connection conn = null;        DatabaseConnection db= new DatabaseConnection();
+        try {
+            
+
+            conn=db.getConnection();
+            String sql = "Select * From currency WHERE active=1";
+            PreparedStatement pst = conn.prepareStatement(sql);
+            ResultSet rs = pst.executeQuery();
+            try {
+                while (rs.next()) {
+                    list.add(new Currency(rs.getString("id"), rs.getString("name"), rs.getBoolean("active")));
+
+                }
+
+                return list;
+
+            } catch (SQLException ex) {
+                Logger.getLogger(ServiceUser.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                if (conn != null) {
+                    try {
+                        conn.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ServiceLanguage.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+    
+    public boolean isAvailableCurrency(String id) {
+        
+        Connection conn = null;        DatabaseConnection db= new DatabaseConnection();
+        try {
+            
+
+            conn=db.getConnection();
+            String sql = "SELECT * FROM `currency` WHERE id=  ?";
+            PreparedStatement pst = conn.prepareStatement(sql);
+            pst.setString(1, id);
+            ResultSet rs = pst.executeQuery();
+            try {
+                while (rs.next()) {
+                    return true;
+
+                }
+
+                
+
+            } catch (SQLException ex) {
+                Logger.getLogger(ServiceUser.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                if (conn != null) {
+                    try {
+                        conn.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(ServiceLanguage.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return false;
+    }
+    
+    public boolean isValidId(String code) {
+        String regex = "[A-Za-z]{3}";
+        Pattern p = Pattern.compile(regex);
+
+        if (code == null) {
+            return false;
+        }
+        Matcher m = p.matcher(code);
+
+        return m.matches();
+
     }
 }
